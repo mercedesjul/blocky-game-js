@@ -1,0 +1,44 @@
+body {
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  margin: 0 auto;
+}
+
+#board {
+  border: 1px solid black;
+  margin-bottom: 30px;
+}
+
+.controls {
+  box-sizing: border-box;
+  font-size: 62px;
+  display: flex;
+  flex-direction: column;
+}
+.b_top,
+.b_bottom {
+  display: flex;
+  justify-content: center;
+}
+.button {
+  outline: 2px solid black;
+  height: 90px;
+  width: 90px;
+  text-align: center;
+  margin: 5px;
+}
+.layout-wrapper {
+  display: flex;
+  justify-content: space-evenly;
+  flex-direction: row;
+}
+.col-1 {
+  flex-grow: 1;
+}
+.col-2 {
+  flex-grow: 2;
+}
+.col-3 {
+  flex-grow: 1;
+}

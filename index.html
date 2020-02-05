@@ -1,0 +1,52 @@
+<html>
+  <head>
+    <title>Totally not Tetris</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" type="text/css" href="./blocky.css" />
+  </head>
+  <body>
+    <div class="layout-wrapper">
+      <div class="col-1">
+        <div class="options">
+          <input
+            id="intervallspeed"
+            type="number"
+            min="5"
+            max="1000"
+            value="100"
+          />
+          <div>Score: <span id="score">0</span></div>
+        </div>
+      </div>
+      <div class="col-2"></div>
+      <div class="col-3">
+        <div class="controls">
+          <div class="b_top">
+            <span class="button" id="bu" onClick="g.handleKey(g.keycode.up)"
+              >&#x2191;</span
+            >
+          </div>
+          <div class="b_bottom">
+            <span class="button" id="bl" onClick="g.handleKey(g.keycode.left)"
+              >&#x2190;</span
+            >
+            <span class="button" id="bd" onClick="g.handleKey(g.keycode.down)"
+              >&#x2193;</span
+            >
+            <span class="button" id="br" onClick="g.handleKey(g.keycode.right)"
+              >&#x2192;</span
+            >
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="./tile.js"></script>
+    <script src="./game.js"></script>
+    <script src="./render.js"></script>
+    <script src="./block.js"></script>
+    <script>
+      g = new Game();
+    </script>
+  </body>
+</html>
