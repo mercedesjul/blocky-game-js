@@ -6,6 +6,9 @@
     <link rel="stylesheet" type="text/css" href="./blocky.css" />
   </head>
   <body>
+    <h1>The Blocky Game</h1>
+    <h4>(Definitely not Tetris)</h4>
+    <h5>Made by Julian</h5>
     <div class="layout-wrapper">
       <div class="col-1">
         <div class="options">
@@ -14,13 +17,16 @@
             type="number"
             min="5"
             max="1000"
-            value="100"
+            value="150"
           />
           <div>Score: <span id="score">0</span></div>
+          <div class="toggle" onclick="g.togglePause()">&#x23f8;</div>
+          <div class="toggle" onclick="g.toggleMute()">&#x1f3b5;</div>
         </div>
       </div>
       <div class="col-2"></div>
-      <div class="col-3">
+      <div class="col-3"></div>
+      <div class="col-4">
         <div class="controls">
           <div class="b_top">
             <span class="button" id="bu" onClick="g.handleKey(g.keycode.up)"

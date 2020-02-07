@@ -1,8 +1,8 @@
 class Render {
   board = null;
   ctx = null;
-  constructor() {
-    this.board = document.getElementById("board");
+  constructor(board) {
+    this.board = board;
     this.ctx = board.getContext("2d");
   }
   drawRasterBackground(tiles) {
@@ -18,8 +18,13 @@ class Render {
     this.ctx.fillStyle = color;
     this.ctx.fillRect(x * 20, y * 20, 20, 20);
   }
+  renderText(text, x, y) {
+    this.ctx.fillStyle = "rgb(0, 0, 0)";
+    this.ctx.font = "62px Monospace"
+    this.ctx.fillText(text, x, y);
+  }
   clear() {
-    this.ctx.clearRect(0, 0, 400, 800);
+    this.ctx.clearRect(0, 0, board.width, board.height);
   }
 
 }

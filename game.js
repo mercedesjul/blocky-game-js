@@ -5,7 +5,11 @@ class Game {
     right: 39,
     down: 40
   };
+  pause;
+  audio;
   scoreboard;
+  canvas;
+  preview;
   screenrefresh = null;
   intervalspeed = 0;
   interval_option;
@@ -14,15 +18,35 @@ class Game {
   width;
   tiles = [];
   active_block = null;
-  render = null;
-  constructor(height = 40, width = 20) {
+  next_block = null;
+  main_render = null;
+  preview_render = null;
+  constructor(width = 20, height = 30) {
+    this.audio = new Audio('tetris.mp3');
+    this.audio.loop = true;
+    this.audio.autoplay = true;
+    let largetstBlock = this.getLargestBlock();
     // Generate Canvas and append to body
-    let canvas = document.createElement("canvas");
-    canvas.setAttribute("id", "board");
-    canvas.setAttribute("height", height * 20);
-    canvas.setAttribute("width", width * 20);
-    document.querySelector(".col-2").appendChild(canvas);
+    this.canvas = document.createElement("canvas");
+    this.canvas.setAttribute("id", "board");
+    this.canvas.setAttribute("height", height * 20);
+    this.canvas.setAttribute("width", width * 20);
+    document.querySelector(".col-2").appendChild(this.canvas);
 
+    this.preview = document.createElement("canvas");
+    this.preview.setAttribute("id", "preview");
+    this.preview.setAttribute("height", largetstBlock * 20);
+    this.preview.setAttribute("width", largetstBlock * 20);
+    document.querySelector(".col-3").appendChild(this.preview);
+
+    document.addEventListener("DOMContentLoaded", () => {
+      document.querySelector(".col-2").appendChild(this.audio);
+    });
+    document.addEventListener("click", () => {
+      if (this.audio.currentTime === 0) {
+        this.audio.play();
+      }
+    });
     // Add EventListener for Keystrokes
     document.addEventListener("keydown", e => {
       this.handleKey(e.keyCode);
@@ -45,19 +69,30 @@ class Game {
   init(height, width) {
     this.interval = null;
     this.tiles = [];
-    this.render = null;
+    this.main_render = null;
+    
 
     this.height = height;
     this.width = width;
-    this.render = new Render();
+    this.main_render = new Render(this.canvas);
+    this.preview_render = new Render(this.preview);
     for (let i = 0; i < height * width; i++) {
       this.tiles.push(new Tile(i, this.width));
     }
-
     this.active_block = new Block(this.width / 2, 2);
+    this.next_block = new Block(0, 0);
 
     this.interval = setInterval(this.mainLoop.bind(this), this.intervalspeed);
     this.screenrefresh = setInterval(this.updateScreen.bind(this), 16.6);
+  }
+  
+  getLargestBlock() {
+    let max = 0;
+    layouts.forEach(layout => {
+      let size = Math.sqrt(layout.length);
+      max = size > max ? size : max;
+    });
+    return max;
   }
 
   mainLoop() {
@@ -67,7 +102,13 @@ class Game {
       this.checkForBlockCollision(list)
     ) {
       this.blockToBackground(this.active_block);
-      this.active_block = new Block(this.width / 2, 0);
+      this.active_block = this.next_block;
+      this.active_block.x = this.width / 2;
+      if (this.checkForBlockCollision(this.active_block.getTilePositionsFromLayout().list)) {
+        alert("Game Over!");
+        document.location.reload();
+      }
+      this.next_block = new Block(0, 0);
       clearInterval(this.interval);
       this.interval = setInterval(
         this.mainLoop.bind(this),
@@ -80,26 +121,39 @@ class Game {
   }
 
   updateScreen() {
-    this.render.clear();
-    this.render.drawRasterBackground(this.tiles);
+    this.main_render.clear();
+    this.preview_render.clear();
+    this.main_render.drawRasterBackground(this.tiles);
     this.renderBlocks();
+    if (this.pause) {
+      this.main_render.renderText("PAUSED", (g.width * 20) / 4, (g.height * 20) / 2);
+    }
   }
 
   renderBlocks() {
     // Render inactive Blocks
     this.tiles.forEach(tile => {
       if (tile.active) {
-        this.render.drawTile(tile.x, tile.y, tile.color);
+        this.main_render.drawTile(tile.x, tile.y, tile.color);
       }
     });
     // Render active Block
     let active_block_tiles = this.active_block.getTilePositionsFromLayout();
     active_block_tiles.list.forEach(block_tile => {
-      this.render.drawTile(
+      this.main_render.drawTile(
         block_tile.x,
         block_tile.y,
         active_block_tiles.color
       );
+    });
+    // Render preview Block
+    let preview_block_tiles = this.next_block.getTilePositionsFromLayout();
+    preview_block_tiles.list.forEach(block_tile => {
+        this.preview_render.drawTile(
+          block_tile.x,
+          block_tile.y,
+          preview_block_tiles.color
+        );
     });
   }
 
@@ -165,19 +219,19 @@ class Game {
     return hit;
   }
 
-  checkForWallCollisionRight() {
+  checkForWallCollisionRight(list) {
     let hit = false;
-    this.active_block.moveRight(true).forEach(tile => {
-      if (tile.x === this.width) {
+    list.forEach(tile => {
+      if (tile.x > this.width - 1) {
         hit = true;
       }
     });
     return hit;
   }
-  checkForWallCollisionLeft() {
+  checkForWallCollisionLeft(list) {
     let hit = false;
-    this.active_block.moveLeft(true).forEach(tile => {
-      if (tile.x === -1) {
+    list.forEach(tile => {
+      if (tile.x < 0) {
         hit = true;
       }
     });
@@ -201,28 +255,57 @@ class Game {
     return this.tiles[x + this.width * y];
   }
 
+  toggleMute() {
+    if (this.audio.paused) {
+      this.audio.play();
+    } else {
+      this.audio.pause();
+    }
+  }
+
+  togglePause() {
+    if (this.pause) {
+      this.interval = setInterval(
+        this.mainLoop.bind(this),
+        this.interval_option.value
+      );
+      this.pause = false;
+    } else {
+      clearInterval(this.interval);
+      this.pause = true;
+    }
+  }
+
   handleKey(keyCode) {
+    let list;
+    let no_collision;
     switch (keyCode) {
       case this.keycode.left:
-        if (
-          !this.checkForWallCollisionLeft() &&
-          !this.checkForBlockCollision(this.active_block.moveLeft(true))
-        ) {
+        if(this.pause) break;
+        list = this.active_block.moveLeft(true);
+        no_collision = !this.checkForWallCollisionLeft(list) && !this.checkForBlockCollision(this.active_block.moveLeft(true));
+        if (no_collision) {
           this.active_block.moveLeft();
         }
         break;
       case this.keycode.right:
-        if (
-          !this.checkForWallCollisionRight() &&
-          !this.checkForBlockCollision(this.active_block.moveRight(true))
-        ) {
+        if(this.pause) break;
+        list = this.active_block.moveRight(true);
+        no_collision = !this.checkForWallCollisionRight(list) && !this.checkForBlockCollision(this.active_block.moveRight(true));
+        if (no_collision) {
           this.active_block.moveRight();
         }
         break;
       case this.keycode.up:
-        this.active_block.rotateRight();
+        if(this.pause) break;
+        list = this.active_block.rotateRight(true);
+        no_collision = !this.checkForWallCollisionLeft(list) && !this.checkForWallCollisionRight(list) && !this.checkForBlockCollision(list) && !this.checkForGroundCollision(list);
+        if (no_collision) {
+          this.active_block.rotateRight();
+        }
         break;
       case this.keycode.down:
+        if(this.pause) break;
         clearInterval(this.interval);
         this.interval = setInterval(this.mainLoop.bind(this), 25);
         break;

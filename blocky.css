@@ -5,23 +5,35 @@ body {
   margin: 0 auto;
 }
 
-#board {
+#board,
+#preview {
   border: 1px solid black;
   margin-bottom: 30px;
 }
-
+h1, 
+h4,
+h5 {
+  text-align: center;
+}
 .controls {
   box-sizing: border-box;
   font-size: 62px;
   display: flex;
   flex-direction: column;
 }
+
+.toggle {
+  font-size: 62px;
+  display: inline;
+}
+
 .b_top,
 .b_bottom {
   display: flex;
   justify-content: center;
 }
-.button {
+.button,
+#mute_toggle {
   outline: 2px solid black;
   height: 90px;
   width: 90px;
@@ -42,3 +54,7 @@ body {
 .col-3 {
   flex-grow: 1;
 }
+.col-4 {
+  flex-grow: 1;
+}
+

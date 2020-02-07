@@ -1,38 +1,38 @@
 const layouts = [
   [
-    0, 0, 0, 0, 0,
-    1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1,
-    0, 0, 0, 0, 0,
+    1, 1, 1, 1,
+    0, 0, 0, 0,
+    0, 0, 0, 0,
+    0, 0, 0, 0,
   ],
   [
-    0, 0, 1, 0, 0,
-    0, 0, 1, 0, 0,
-    0, 0, 1, 0, 0,
-    0, 0, 1, 0, 0,
-    0, 0, 1, 0, 0,
+    0, 0, 1,
+    1, 1, 1,
+    0, 0, 0,
   ],
   [
-    0, 0, 1, 0, 0,
-    0, 0, 1, 0, 0,
-    0, 1, 1, 0, 0,
-    0, 1, 0, 0, 0,
-    0, 1, 0, 0, 0,
+    1, 0, 0,
+    1, 1, 1,
+    0, 0, 0,
   ],
   [
-    0, 0, 1, 0, 0,
-    0, 0, 1, 0, 0,
-    0, 1, 1, 0, 0,
-    0, 1, 1, 0, 0,
-    0, 0, 0, 0, 0,
+    1, 1,
+    1, 1,
   ],
   [
-    0, 0, 1, 0, 0,
-    0, 0, 1, 0, 0,
-    0, 1, 1, 0, 0,
-    0, 1, 0, 0, 0,
-    0, 1, 0, 0, 0,
+    0, 1, 1,
+    1, 1, 0,
+    0, 0, 0,
+  ],
+  [
+    0, 1, 0,
+    1, 1, 1,
+    0, 0, 0,
+  ],
+  [
+    1, 1, 0,
+    0, 1, 1,
+    0, 0, 0,
   ],
 ];
 class Block {
@@ -81,45 +81,33 @@ class Block {
     }
     return this.getTilePositionsFromLayout(this.x, this.y - 1).list;
   }
-  rotateRight() {
-    // May the Lord forgive me for this solution
+  rotateRight(dryrun) {
     let newLayout = [];
-    newLayout[0] = this.layout[20];
-    newLayout[1] = this.layout[15];
-    newLayout[2] = this.layout[10];
-    newLayout[3] = this.layout[5];
-    newLayout[4] = this.layout[0];
-    newLayout[5] = this.layout[21];
-    newLayout[6] = this.layout[16];
-    newLayout[7] = this.layout[11];
-    newLayout[8] = this.layout[6];
-    newLayout[9] = this.layout[1];
-    newLayout[10] = this.layout[22];
-    newLayout[11] = this.layout[17];
-    newLayout[12] = this.layout[12];
-    newLayout[13] = this.layout[7];
-    newLayout[14] = this.layout[2];
-    newLayout[15] = this.layout[23];
-    newLayout[16] = this.layout[18];
-    newLayout[17] = this.layout[13];
-    newLayout[18] = this.layout[8];
-    newLayout[19] = this.layout[3];
-    newLayout[20] = this.layout[24];
-    newLayout[21] = this.layout[19];
-    newLayout[22] = this.layout[14];
-    newLayout[23] = this.layout[9];
-    newLayout[24] = this.layout[4];
-    this.layout = newLayout;
+    // May the Lord be pleased with this solution
+    const layout_length = this.layout.length;
+    const sqrt_length = Math.sqrt(layout_length);
+    let counter = 0;
+    for (let i = sqrt_length; counter < layout_length; i--) {
+      for (let k = 0; k < Math.sqrt(this.layout.length); k++) {
+        newLayout[counter] = this.layout[layout_length - ((sqrt_length * k) + i)];
+        counter++;
+      }
+    }
+    if (!dryrun) {
+      this.layout = newLayout;
+    }
+    return this.getTilePositionsFromLayout(this.x, this.y, newLayout).list;
   }
 
-  getTilePositionsFromLayout(x = this.x, y = this.y) {
+  getTilePositionsFromLayout(x = this.x, y = this.y, layout = this.layout) {
     let list = [];
-    for(let i = 0; i < this.layout.length; i++) {
-      if (this.layout[i] === 1) {
+    let block_width = Math.sqrt(layout.length);
+    for(let i = 0; i < layout.length; i++) {
+      if (layout[i] === 1) {
         list.push(
           {
-            x: Math.floor(i % 5) + x - 2,
-            y: Math.floor(i / 5) + y - 2,
+            x: Math.floor(i % block_width) + x,
+            y: Math.floor(i / block_width) + y,
           });
       }
     }
