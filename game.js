@@ -43,7 +43,7 @@ class Game {
     });
     document.addEventListener("click", () => {
       if (this.audio.currentTime === 0) {
-        this.audio.play();
+        //this.audio.play();
       }
     });
     // Add EventListener for Keystrokes
