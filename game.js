@@ -24,7 +24,6 @@ class Game {
   constructor(width = 20, height = 30) {
     this.audio = new Audio('tetris.mp3');
     this.audio.loop = true;
-    this.audio.autoplay = true;
     let largetstBlock = this.getLargestBlock();
     // Generate Canvas and append to body
     this.canvas = document.createElement("canvas");
